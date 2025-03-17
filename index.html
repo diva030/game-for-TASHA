@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Catching Game for Tasha</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a2e;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        canvas {
+            background-color: #0f0f17;
+            border: 2px solid #ff80ab;
+        }
+
+        h1 {
+            position: absolute;
+            top: 20px;
+            font-size: 2em;
+            color: #ff80ab;
+            text-align: center;
+        }
+
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            color: #ff80ab;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Catch the Hearts for a Surprise! 💖</h1>
+    <div id="message">You caught all the hearts! 💖 You did it, Tasha! Just like you caught my heart too! 💕</div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const message = document.getElementById("message");
+
+        let hearts = [];
+        let score = 0;
+        const targetScore = 8;
+
+        function createHeart() {
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: 20,
+                caught: false,
+                dx: (Math.random() - 0.5) * 2,
+                dy: (Math.random() - 0.5) * 2
+            };
+        }
+
+        for (let i = 0; i < targetScore; i++) {
+            hearts.push(createHeart());
+        }
+
+        canvas.addEventListener("click", (event) => {
+            const clickX = event.clientX - canvas.offsetLeft;
+            const clickY = event.clientY - canvas.offsetTop;
+
+            hearts.forEach(heart => {
+                const dist = Math.sqrt((clickX - heart.x) ** 2 + (clickY - heart.y) ** 2);
+                if (dist < heart.size && !heart.caught) {
+                    heart.caught = true;
+                    score++;
+                }
+            });
+
+            if (score >= targetScore) {
+                message.style.display = "block";
+            }
+        });
+
+        function drawHeart(heart) {
+            ctx.beginPath();
+            const size = heart.size;
+            ctx.moveTo(heart.x, heart.y);
+            ctx.bezierCurveTo(heart.x - size / 2, heart.y - size / 2, heart.x - size, heart.y + size / 2, heart.x, heart.y + size);
+            ctx.bezierCurveTo(heart.x + size, heart.y + size / 2, heart.x + size / 2, heart.y - size / 2, heart.x, heart.y);
+            ctx.fillStyle = heart.caught ? "#ff80ab" : "#ff4d6d";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#ff4d6d";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hearts.forEach(heart => {
+                if (!heart.caught) {
+                    heart.x += heart.dx;
+                    heart.y += heart.dy;
+
+                    if (heart.x < 0 || heart.x > canvas.width) heart.dx *= -1;
+                    if (heart.y < 0 || heart.y > canvas.height) heart.dy *= -1;
+                }
+                drawHeart(heart);
+            });
+            requestAnimationFrame(update);
+        }
+
+        update();
+    </script>
+</body>
+</html>
